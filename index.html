@@ -538,7 +538,7 @@
   </div>
   <div class="about-card reveal">
     <p class="about-text">
-<strong>Python Full Stack Developer</strong> with a B.Tech in Computer Science and Artificial Intelligence, focused on building scalable web applications and AI-powered solutions. Passionate about creating clean, efficient, and user-centric digital experiences.
+      <strong>Python Full Stack Developer</strong> with a B.Tech in Computer Science and Artificial Intelligence, focused on building scalable web applications and AI-powered solutions. Passionate about creating clean, efficient, and user-centric digital experiences.
     </p>
     <p class="about-text">
       With hands-on internship experience at <strong>SmartBridge</strong> and <strong>Rooman Technologies</strong>, I've developed real-world skills in full stack development, UI/UX design, and application logic — building projects that merge creativity with technical depth.
@@ -667,7 +667,7 @@
     <h2 class="sec-h">Experience</h2>
     <div class="sec-line"></div>
   </div>
-  <div class="timeline">
+  < class="timeline">
     <div class="tl-item reveal">
       <div class="tl-dot">💼</div>
       <div class="tl-body">
@@ -695,6 +695,7 @@
           <li>Tested and optimized applications for performance and cross-platform compatibility</li>
         </ul>
       </div>
+    </div>
   </div>
 </section>
 
@@ -813,60 +814,155 @@ document.querySelectorAll('#nav-links a').forEach(a => {
   a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
 });
 
-// ── CANVAS STARFIELD ──
+// ── BACKGROUND: AURORA WAVES + NEURAL NET + GEOMETRY + DNA ──
 const canvas = document.getElementById('bg');
 const ctx    = canvas.getContext('2d');
 function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 resize(); window.addEventListener('resize', resize);
 
-const stars = Array.from({length: 200}, () => ({
-  x: Math.random() * window.innerWidth,
-  y: Math.random() * window.innerHeight,
-  r: Math.random() * 1.6 + 0.3,
-  speed: Math.random() * 0.35 + 0.05,
-  o: Math.random() * 0.7 + 0.2
-}));
-
-const orbs = [
-  { x:0.15, y:0.2,  r:230, c:'rgba(99,102,241,0.07)', s:0.0008 },
-  { x:0.85, y:0.6,  r:290, c:'rgba(168,85,247,0.05)', s:-0.0006 },
-  { x:0.5,  y:0.88, r:210, c:'rgba(6,182,212,0.06)',  s:0.001 },
-];
-
 let frame = 0;
 let mxN=0.5, myN=0.5;
 document.addEventListener('mousemove', e => { mxN=e.clientX/window.innerWidth; myN=e.clientY/window.innerHeight; });
 
+const shapes = Array.from({length: 22}, (_, i) => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  vx: (Math.random() - 0.5) * 0.4,
+  vy: (Math.random() - 0.5) * 0.4,
+  size: Math.random() * 26 + 8,
+  type: i % 4,
+  rot: Math.random() * Math.PI * 2,
+  rotSpeed: (Math.random() - 0.5) * 0.008,
+  alpha: Math.random() * 0.11 + 0.03,
+  color: ['rgba(99,102,241,','rgba(168,85,247,','rgba(6,182,212,','rgba(16,185,129,'][i % 4]
+}));
+
+const waves = [
+  { amp:0.08, freq:0.8, phase:0, speed:0.004, color:'rgba(99,102,241,', baseY:0.3 },
+  { amp:0.06, freq:1.2, phase:2.1, speed:-0.003, color:'rgba(168,85,247,', baseY:0.6 },
+  { amp:0.05, freq:0.6, phase:1.0, speed:0.005, color:'rgba(6,182,212,', baseY:0.82 },
+];
+
+const nodes = Array.from({length: 14}, () => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  vx: (Math.random() - 0.5) * 0.25,
+  vy: (Math.random() - 0.5) * 0.25,
+  r: Math.random() * 3 + 1.5,
+  pulse: Math.random() * Math.PI * 2
+}));
+
+const helixDots = Array.from({length: 60}, (_, i) => ({
+  progress: i / 60,
+  speed: 0.0008 + Math.random() * 0.0004
+}));
+
+function drawPoly(x, y, sides, size, rot) {
+  ctx.beginPath();
+  for(let i = 0; i < sides; i++) {
+    const a = rot + (i * Math.PI * 2) / sides;
+    i === 0 ? ctx.moveTo(x + size*Math.cos(a), y + size*Math.sin(a))
+            : ctx.lineTo(x + size*Math.cos(a), y + size*Math.sin(a));
+  }
+  ctx.closePath();
+}
+
 function drawBg() {
+  const W = canvas.width, H = canvas.height;
   ctx.fillStyle='#030712';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillRect(0,0,W,H);
 
-  // grid
-  ctx.strokeStyle='rgba(99,102,241,0.035)'; ctx.lineWidth=1;
-  const gs=60;
-  for(let x=0;x<canvas.width;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-  for(let y=0;y<canvas.height;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
-
-  // orbs
-  orbs.forEach(o => {
-    const ox=(o.x+Math.sin(frame*o.s)*0.1+(mxN-0.5)*0.05)*canvas.width;
-    const oy=(o.y+Math.cos(frame*o.s)*0.1+(myN-0.5)*0.05)*canvas.height;
-    const g=ctx.createRadialGradient(ox,oy,0,ox,oy,o.r);
-    g.addColorStop(0,o.c); g.addColorStop(1,'transparent');
-    ctx.beginPath(); ctx.arc(ox,oy,o.r,0,Math.PI*2);
+  // Aurora glow blobs
+  [{x:0.1+Math.sin(frame*0.0007)*0.1, y:0.15, r:W*0.55, c:'rgba(99,102,241,0.055)'},
+   {x:0.88+Math.cos(frame*0.0009)*0.08, y:0.5, r:W*0.5, c:'rgba(168,85,247,0.04)'},
+   {x:0.5+Math.sin(frame*0.0005)*0.12, y:0.85, r:W*0.45, c:'rgba(6,182,212,0.045)'},
+   {x:mxN, y:myN, r:W*0.22, c:'rgba(99,102,241,0.038)'}
+  ].forEach(a => {
+    const g = ctx.createRadialGradient(a.x*W,a.y*H,0,a.x*W,a.y*H,a.r);
+    g.addColorStop(0,a.c); g.addColorStop(1,'transparent');
+    ctx.beginPath(); ctx.arc(a.x*W,a.y*H,a.r,0,Math.PI*2);
     ctx.fillStyle=g; ctx.fill();
   });
 
-  // stars
-  stars.forEach(s => {
-    s.y -= s.speed;
-    if(s.y<0){ s.y=canvas.height; s.x=Math.random()*canvas.width; }
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(165,180,252,${s.o})`; ctx.fill();
+  // Flowing wave lines
+  waves.forEach((w,wi) => {
+    w.phase += w.speed;
+    ctx.beginPath();
+    for(let i=0;i<=120;i++){
+      const t=i/120, wx=t*W;
+      const wy=w.baseY*H+Math.sin(t*Math.PI*2*w.freq+w.phase+mxN*0.8)*H*w.amp
+               +Math.sin(t*Math.PI*3*w.freq+w.phase*1.3)*H*w.amp*0.4;
+      i===0?ctx.moveTo(wx,wy):ctx.lineTo(wx,wy);
+    }
+    ctx.strokeStyle=w.color+(0.06+Math.sin(frame*0.02+wi)*0.02)+')';
+    ctx.lineWidth=1.5+wi*0.5; ctx.stroke();
   });
 
-  frame++;
-  requestAnimationFrame(drawBg);
+  // Floating geometry
+  shapes.forEach(s => {
+    s.x+=s.vx+(mxN-0.5)*0.04; s.y+=s.vy+(myN-0.5)*0.04; s.rot+=s.rotSpeed;
+    if(s.x<-50)s.x=W+50; if(s.x>W+50)s.x=-50;
+    if(s.y<-50)s.y=H+50; if(s.y>H+50)s.y=-50;
+    const pulse=s.alpha+Math.sin(frame*0.02+s.x*0.01)*0.02;
+    ctx.strokeStyle=s.color+Math.max(0,pulse)+')';
+    ctx.fillStyle=s.color+Math.max(0,pulse*0.14)+')';
+    ctx.lineWidth=0.8;
+    const sides=[3,4,6,4][s.type];
+    const extraRot=s.type===3?Math.PI/4:0;
+    drawPoly(s.x,s.y,sides,s.size,s.rot+extraRot);
+    ctx.fill(); ctx.stroke();
+  });
+
+  // Neural network
+  nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;n.pulse+=0.03;
+    if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;});
+  nodes.forEach((n,i)=>{
+    nodes.forEach((m,j)=>{
+      if(j<=i)return;
+      const dx=n.x-m.x,dy=n.y-m.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<220){
+        const al=(1-dist/220)*0.12;
+        const gr=ctx.createLinearGradient(n.x,n.y,m.x,m.y);
+        gr.addColorStop(0,`rgba(99,102,241,${al})`);
+        gr.addColorStop(0.5,`rgba(168,85,247,${al*0.7})`);
+        gr.addColorStop(1,`rgba(6,182,212,${al})`);
+        ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);
+        ctx.strokeStyle=gr;ctx.lineWidth=0.6;ctx.stroke();
+      }
+    });
+    const pr=n.r+Math.sin(n.pulse)*1.2;
+    const ng=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,pr*4);
+    ng.addColorStop(0,'rgba(99,102,241,0.5)');ng.addColorStop(0.5,'rgba(168,85,247,0.12)');ng.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(n.x,n.y,pr*4,0,Math.PI*2);ctx.fillStyle=ng;ctx.fill();
+    ctx.beginPath();ctx.arc(n.x,n.y,pr,0,Math.PI*2);
+    ctx.fillStyle=`rgba(165,180,252,${0.4+Math.sin(n.pulse)*0.2})`;ctx.fill();
+  });
+
+  // DNA helix (right edge)
+  const hx=W*0.93;
+  helixDots.forEach(d=>{
+    d.progress=(d.progress+d.speed)%1;
+    const hy=d.progress*H;
+    const a1=d.progress*Math.PI*10+frame*0.008;
+    const a2=a1+Math.PI, rad=18;
+    const d1=(Math.sin(a1)+1)/2, d2=(Math.sin(a2)+1)/2;
+    ctx.beginPath();ctx.arc(hx+Math.cos(a1)*rad,hy,2+d1*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(99,102,241,${0.05+d1*0.18})`;ctx.fill();
+    ctx.beginPath();ctx.arc(hx+Math.cos(a2)*rad,hy,2+d2*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(6,182,212,${0.05+d2*0.18})`;ctx.fill();
+    if(Math.floor(d.progress*20)%2===0){
+      ctx.beginPath();ctx.moveTo(hx+Math.cos(a1)*rad,hy);ctx.lineTo(hx+Math.cos(a2)*rad,hy);
+      ctx.strokeStyle=`rgba(168,85,247,${Math.min(d1,d2)*0.1})`;ctx.lineWidth=0.5;ctx.stroke();
+    }
+  });
+
+  // Moving scan line
+  const sy=((frame*1.2)%(H+40))-20;
+  const sg=ctx.createLinearGradient(0,sy-30,0,sy+30);
+  sg.addColorStop(0,'transparent');sg.addColorStop(0.5,'rgba(99,102,241,0.022)');sg.addColorStop(1,'transparent');
+  ctx.fillStyle=sg;ctx.fillRect(0,sy-30,W,60);
+
+  frame++; requestAnimationFrame(drawBg);
 }
 drawBg();
 
